@@ -5,6 +5,7 @@ public class PlayerMovement : MonoBehaviour
     public float force = 20f;
 
     public Transform cameraTransform;
+    public float gravityMultiplier = 1f;
 
     private Rigidbody rb;
 
@@ -32,5 +33,9 @@ public class PlayerMovement : MonoBehaviour
             cameraRight * horizontal;
 
         rb.AddForce(movement * force);
+        rb.AddForce(
+            Physics.gravity * gravityMultiplier,
+            ForceMode.Acceleration
+        );
     }
 }

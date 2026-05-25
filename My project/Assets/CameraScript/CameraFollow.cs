@@ -1,5 +1,3 @@
-using System.Collections;
-using System.Collections.Generic;
 using UnityEngine;
 
 public class CameraFollow : MonoBehaviour
@@ -7,47 +5,52 @@ public class CameraFollow : MonoBehaviour
     public Transform player;
 
     public float distance = 6f;
-    public float minDistance = 3f;
-    public float maxDistance = 10f;
+    public float height = 4f;
 
-    public float height = 2f;
+    public float rotationSmoothness = 3f;
+    public float positionSmoothness = 5f;
 
-    public float mouseSensitivity = 3f;
-    public float zoomSensitivity = 10f;
+    private Rigidbody playerRb;
 
-    private float yaw;
+    private Vector3 currentDirection;
 
-     void Start()
+    void Start()
     {
-        // Lock yaw to player's facing direction at start
-        yaw = player.eulerAngles.y;
+        playerRb = player.GetComponent<Rigidbody>();
+
+        currentDirection = -player.forward;
     }
 
     void LateUpdate()
     {
-        // 🧭 rotate camera around player
-        yaw += Input.GetAxis("Mouse X") * mouseSensitivity;
+        Vector3 velocity = playerRb.velocity;
 
-        // 🔍 zoom in/out
-        float scroll = Input.GetAxis("Mouse Y");
-        distance -= scroll * zoomSensitivity;
+        velocity.y = 0;
 
-        distance = Mathf.Clamp(distance, minDistance, maxDistance);
+        // only update direction if moving enough
+        if (velocity.sqrMagnitude > 0.1f)
+        {
+            Vector3 targetDirection = -velocity.normalized;
 
-        // direction around player
-        Quaternion rotation = Quaternion.Euler(0, yaw, 0);
+            currentDirection = Vector3.Slerp(
+                currentDirection,
+                targetDirection,
+                rotationSmoothness * Time.deltaTime
+            );
+        }
+        
 
-        Vector3 direction = rotation * Vector3.back;
+        Vector3 desiredPosition =
+            player.position +
+            currentDirection * distance +
+            Vector3.up * height;
 
-        // 👇 KEY CHANGE: low ground-follow position
-        Vector3 targetPosition =
-            player.position
-            + Vector3.up * height
-            + direction * distance;
+        transform.position = Vector3.Lerp(
+            transform.position,
+            desiredPosition,
+            positionSmoothness * Time.deltaTime
+        );
 
-        transform.position = targetPosition;
-
-        // always look at player slightly above center
-        transform.LookAt(player.position + Vector3.up * 1f);
+        transform.LookAt(player);
     }
 }
