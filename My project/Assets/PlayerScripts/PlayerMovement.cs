@@ -31,7 +31,7 @@ public class PlayerMovement : MonoBehaviour
         Vector3 movement =
             cameraForward * vertical +
             cameraRight * horizontal;
-
+        
         rb.AddForce(movement * force);
         rb.AddForce(
             Physics.gravity * gravityMultiplier,

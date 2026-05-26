@@ -6,6 +6,7 @@ public class CameraFollow : MonoBehaviour
 
     public float distance = 6f;
     public float height = 4f;
+    public float lookTargetVariable = 1f;
 
     public float rotationSmoothness = 3f;
     public float positionSmoothness = 5f;
@@ -38,8 +39,14 @@ public class CameraFollow : MonoBehaviour
     // Only update camera direction if movement is meaningful
     if (speed > 0.1f)
     {
-        // Convert velocity into a direction (where the player is actually moving)
-        targetDirection = -velocity.normalized;
+        Vector3 camForward = Vector3.ProjectOnPlane(transform.forward, Vector3.up).normalized;
+        Vector3 camRight = Vector3.ProjectOnPlane(transform.right, Vector3.up).normalized;
+
+        Vector3 localVelocity =
+            camForward * Vector3.Dot(velocity, camForward) +
+            camRight * Vector3.Dot(velocity, camRight);
+
+        targetDirection = -localVelocity.normalized;
     }
 
     // Convert speed into 0–1 range so we can scale camera responsiveness
@@ -57,9 +64,13 @@ public class CameraFollow : MonoBehaviour
     );
 
     // Compute final camera position around player
+    Vector3 followDir = currentDirection;
+    followDir.y = -0.05f;
+    followDir.Normalize();
+
     Vector3 desiredPosition =
         player.position +
-        currentDirection * distance +
+        followDir * distance +
         Vector3.up * height;
 
     // Smooth camera position movement (prevents snapping)
@@ -69,7 +80,8 @@ public class CameraFollow : MonoBehaviour
         positionSmoothness * Time.deltaTime
     );
 
-    // Always look at player so they stay centered in view
-    transform.LookAt(player);
+    // Always look at above the player, so they stay in the bottom 3rd of the screen. 
+    Vector3 lookTarget = player.position + Vector3.up * lookTargetVariable;
+    transform.LookAt(lookTarget);
 }
 }
