@@ -8,7 +8,7 @@ public class PlayerRespawn : MonoBehaviour
     private Vector3 startPosition;
     private Quaternion startRotation;
 
-    public float fallThreshold = -10f;
+    public float fallThreshold = -100f;
 
     void Start()
     {

@@ -8,8 +8,8 @@ public class PlayerMovement : MonoBehaviour
     public float gravityMultiplier = 1f;
     public float scaler = 0.1f;
 
-    public float groundForce = 35f;
-    public float airForce = 10f;
+    public float groundForce = 17f;
+    public float airForce = 0f;
 
     public float groundCheckDistance = 1.1f;
 
@@ -83,7 +83,10 @@ public class PlayerMovement : MonoBehaviour
         float accelMultiplier = Mathf.Lerp(0.4f, 1.2f, speed01 * speed01);
 
         // Apply movement force with speed-based scaling
-        rb.AddForce(moveDir * moveForce * accelMultiplier, ForceMode.Acceleration);
+        rb.AddForce(
+            moveDir * moveForce * accelMultiplier,
+            ForceMode.Acceleration
+        );
 
         // Apply modified gravity for consistent falling behavior
         rb.AddForce(Physics.gravity * gravityMultiplier, ForceMode.Acceleration);
