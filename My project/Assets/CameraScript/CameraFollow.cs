@@ -73,6 +73,11 @@ public class CameraFollow : MonoBehaviour
         followDir * distance +
         Vector3.up * height;
 
+// Press P to snap camera behind the player, useful if you get disoriented or want to quickly look forward.
+    if (Input.GetKeyDown(KeyCode.P))
+        {
+            currentDirection = -player.forward;
+        }   
     // Smooth camera position movement (prevents snapping)
     transform.position = Vector3.Lerp(
         transform.position,

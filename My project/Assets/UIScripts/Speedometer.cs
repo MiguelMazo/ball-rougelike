@@ -11,7 +11,7 @@ public class Speedometer : MonoBehaviour
         Vector3 flatVelocity = playerRb.velocity;
         flatVelocity.y = 0;
 
-        float speed = flatVelocity.magnitude;
+        float speed = playerRb.velocity.magnitude;
 
         speedText.text = "Speed: " + speed.ToString("0.0");
         if (speed < 5)
@@ -20,5 +20,7 @@ public class Speedometer : MonoBehaviour
             speedText.color = Color.yellow;
         else
             speedText.color = Color.red;
+
+        Debug.Log($"Speed: {playerRb.velocity.magnitude} | Flat: {flatVelocity.magnitude}");
     }
 }
