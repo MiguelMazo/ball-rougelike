@@ -11,6 +11,18 @@ public class CameraFollow : MonoBehaviour
     public float rotationSmoothness = 3f;
     public float positionSmoothness = 5f;
 
+    public float maxRollAngle = 5f;
+    public float maxPitchAngle = 3f;
+    public float cameraTiltSmoothness = 6f;
+
+    public float forwardDistanceBoost = 2f;
+    public float backwardHeightBoost = 1.5f;
+
+    public float cameraResponseSpeed = 5f;
+
+    private float currentRoll;
+    private float currentPitch;
+
     private Rigidbody playerRb;
 
     private Vector3 currentDirection;
@@ -26,6 +38,9 @@ public class CameraFollow : MonoBehaviour
 {
    // Get player velocity from physics
     Vector3 velocity = playerRb.velocity;
+
+    float horizontalInput = Input.GetAxis("Horizontal");
+    float verticalInput = Input.GetAxis("Vertical");
 
     // Ignore vertical movement so camera doesn't react to jumping/falling
     velocity.y = 0;
@@ -68,31 +83,63 @@ public class CameraFollow : MonoBehaviour
     followDir.y = -0.05f;
     followDir.Normalize();
 
+    // forward = push camera back
+    float dynamicDistance =
+        distance + (verticalInput * forwardDistanceBoost);
+
+    // backward = raise camera slightly
+    float dynamicHeight =
+        height + (-verticalInput * backwardHeightBoost);
+
     Vector3 desiredPosition =
         player.position +
-        followDir * distance +
-        Vector3.up * height;
+        followDir * dynamicDistance +
+    Vector3.up * dynamicHeight;
 
-// Press P to snap camera behind the player, useful if you get disoriented or want to quickly look forward. 
-    if (Input.GetKeyDown(KeyCode.P))
-        {
-            Vector3 vel = playerRb.velocity;
-            vel.y = 0f;
-
-            if (vel.sqrMagnitude > 0.01f)
+    // Press P to snap camera behind the player, useful if you get disoriented or want to quickly look forward. 
+        if (Input.GetKeyDown(KeyCode.P))
             {
-                currentDirection = -vel.normalized;
-            }
-        }   
-    // Smooth camera position movement (prevents snapping)
-    transform.position = Vector3.Lerp(
+                Vector3 vel = playerRb.velocity;
+                vel.y = 0f;
+
+                if (vel.sqrMagnitude > 0.01f)
+                {
+                    currentDirection = -vel.normalized;
+                }
+            }   
+        // Smooth camera position movement (prevents snapping)
+        transform.position = Vector3.Lerp(
         transform.position,
         desiredPosition,
         positionSmoothness * Time.deltaTime
     );
 
-    // Always look at above the player, so they stay in the bottom 3rd of the screen. 
     Vector3 lookTarget = player.position + Vector3.up * lookTargetVariable;
     transform.LookAt(lookTarget);
-}
+
+    // target tilt
+    float targetRoll = -horizontalInput * maxRollAngle * speedFactor;
+    float targetPitch = verticalInput * maxPitchAngle * speedFactor;
+
+    // smooth tilt
+    currentRoll = Mathf.Lerp(
+        currentRoll,
+        targetRoll,
+        cameraTiltSmoothness * Time.deltaTime
+    );
+
+    currentPitch = Mathf.Lerp(
+        currentPitch,
+        targetPitch,
+        cameraTiltSmoothness * Time.deltaTime
+    );
+
+    // apply tilt AFTER LookAt (this is the key difference)
+    transform.Rotate(
+        currentPitch,
+        0f,
+        currentRoll,
+        Space.Self
+    );
+    }
 }
