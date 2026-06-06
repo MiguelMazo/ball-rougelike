@@ -20,7 +20,5 @@ public class Speedometer : MonoBehaviour
             speedText.color = Color.yellow;
         else
             speedText.color = Color.red;
-
-        Debug.Log($"Speed: {playerRb.velocity.magnitude} | Flat: {flatVelocity.magnitude}");
     }
 }
